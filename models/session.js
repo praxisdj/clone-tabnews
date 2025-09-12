@@ -52,7 +52,6 @@ async function findOneValidByToken(sessionToken) {
 
     return results.rows[0];
   }
-
 }
 
 async function renew(sessionId) {

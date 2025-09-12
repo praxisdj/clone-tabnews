@@ -187,7 +187,6 @@ async function findOneById(id) {
   return userFound;
 }
 
-
 const user = {
   create,
   update,
