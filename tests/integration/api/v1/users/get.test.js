@@ -83,6 +83,19 @@ describe("GET /api/v1/users/[username]", () => {
         action: "Please log in again.",
         status_code: 401,
       });
+
+      // Set-Cookie assertions
+      const parsedSetCookie = setCookieParser(response, {
+        map: true,
+      });
+
+      expect(parsedSetCookie.session_id).toEqual({
+        name: "session_id",
+        value: "invalid",
+        maxAge: -1,
+        path: "/",
+        httpOnly: true,
+      });
     });
 
     test("With expired session", async () => {
@@ -111,6 +124,19 @@ describe("GET /api/v1/users/[username]", () => {
         message: "Session not found or expired.",
         action: "Please log in again.",
         status_code: 401,
+      });
+
+      // Set-Cookie assertions
+      const parsedSetCookie = setCookieParser(response, {
+        map: true,
+      });
+
+      expect(parsedSetCookie.session_id).toEqual({
+        name: "session_id",
+        value: "invalid",
+        maxAge: -1,
+        path: "/",
+        httpOnly: true,
       });
     });
   });
