@@ -50,6 +50,10 @@ async function findOneValidByToken(sessionToken) {
       });
     }
 
+    if (results.rows.length > 1) {
+      throw new Error("Multiple valid sessions found with the same token");
+    }
+
     return results.rows[0];
   }
 }
@@ -78,10 +82,34 @@ async function renew(sessionId) {
   }
 }
 
+async function expireById(sessionId) {
+  const expiredSession = await runUpdateQuery(sessionId);
+  return expiredSession;
+
+  async function runUpdateQuery(sessionId) {
+    const results = await database.query({
+      text: `
+      UPDATE sessions
+      SET expires_at = expires_at - INTERVAL '1 year',
+          updated_at = NOW()
+      WHERE id = $1
+      RETURNING *;
+    `,
+      values: [sessionId],
+    });
+
+    if (results.rows.length === 0) {
+      throw new Error("Failed to expire session");
+    }
+    return results.rows[0];
+  }
+}
+
 const session = {
   create,
   findOneValidByToken,
   renew,
+  expireById,
   EXPIRATION_IN_MILLISECONDS,
 };
 
