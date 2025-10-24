@@ -22,7 +22,9 @@ describe("infra/email", () => {
       expect(lastEmail.sender).toBe("<email@djonathan.com>");
       expect(lastEmail.subject).toBe("Test email subject");
       expect(lastEmail.recipients[0]).toBe("<receiver@test.com>");
-      expect(lastEmail.text).toBe("This is a test email sent from the integration test.\n");
+      expect(lastEmail.text).toBe(
+        "This is a test email sent from the integration test.\n",
+      );
     });
   });
 });
