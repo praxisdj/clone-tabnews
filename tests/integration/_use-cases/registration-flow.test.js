@@ -29,14 +29,22 @@ describe("Use Case: Registration Flow - Success", () => {
       id: createUserResponseBody.id,
       username: "RegistrationFlow",
       email: "registration.flow@email.com",
-      features: [],
+      features: ["read:activation_token"],
       password: createUserResponseBody.password,
       created_at: createUserResponseBody.created_at,
       updated_at: createUserResponseBody.updated_at,
     });
   });
 
-  test("Receive activation email", async () => { });
+  test("Receive activation email", async () => {
+    const lastEmail = await orchestrator.getLastEmail();
+
+    expect(lastEmail).not.toBeNull();
+    expect(lastEmail.sender).toBe("DJ <email@djonathan.com>");
+    expect(lastEmail.recipients[0]).toBe("<registration.flow@email.com>");
+    expect(lastEmail.subject).toBe("Activate your account");
+    expect(lastEmail.text).toContain("RegistrationFlow");
+  });
   test("Activate user account", async () => { });
   test("Login to user account", async () => { });
   test("Get user information", async () => { });

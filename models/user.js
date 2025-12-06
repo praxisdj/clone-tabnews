@@ -7,8 +7,33 @@ async function create(userInputValues) {
   await validateUniqueEmail(userInputValues.email);
   await validateUniqueUsername(userInputValues.username);
   await hashPasswordInObject(userInputValues);
+  injectDefaultFeatures(userInputValues);
+
   const newUser = await runInsertQuery(userInputValues);
   return newUser;
+
+  async function runInsertQuery(userInputValues) {
+    const dbResult = await database.query({
+      text: `
+      INSERT INTO users (username, email, password, features)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `,
+      values: [
+        userInputValues.username,
+        userInputValues.email,
+        userInputValues.password,
+        userInputValues.features,
+      ],
+    });
+
+    return dbResult.rows[0];
+  }
+
+  function injectDefaultFeatures(userInputValues) {
+    userInputValues.features = ["read:activation_token"];
+  }
+
 }
 
 async function update(username, userInputValues) {
@@ -90,23 +115,6 @@ async function validateUniqueUsername(username) {
       action: `Try again with a different username.`,
     });
   }
-}
-
-async function runInsertQuery(userInputValues) {
-  const dbResult = await database.query({
-    text: `
-      INSERT INTO users (username, email, password)
-      VALUES ($1, $2, $3)
-      RETURNING *;
-    `,
-    values: [
-      userInputValues.username,
-      userInputValues.email,
-      userInputValues.password,
-    ],
-  });
-
-  return dbResult.rows[0];
 }
 
 async function findOneByUserName(username) {
