@@ -1,4 +1,5 @@
 import email from "infra/email";
+import { NotFoundError } from "infra/errors";
 import database from "infra/database";
 import webserver from "infra/webserver";
 
@@ -34,22 +35,32 @@ async function create(userId) {
   }
 }
 
-async function findOneByUserId(userId) {
+async function findOneValidById(token) {
   const result = await database.query({
     text: `
-    SELECT * FROM user_activation_tokens
-    WHERE user_id = $1
-  `,
-    values: [userId],
+      SELECT * FROM user_activation_tokens
+      WHERE id = $1
+      AND expires_at > NOW()
+      AND used_at IS NULL
+      LIMIT 1;`,
+    values: [token],
   });
+
+  if (result.rowCount === 0) {
+    throw new NotFoundError({
+      name: "NotFoundError",
+      message: "Activation token not found or expired.",
+      action: "Try again with a different token.",
+    });
+  }
 
   return result.rows[0];
 }
 
 const activation = {
-  findOneByUserId,
   sendEmailToUser,
   create,
+  findOneValidById,
 };
 
 export default activation;
