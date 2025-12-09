@@ -195,12 +195,27 @@ async function findOneById(id) {
   return userFound;
 }
 
+async function setFeatures(userId, features) {
+  const result = await database.query({
+    text: `
+    UPDATE users
+    SET features = $1
+    WHERE id = $2
+    RETURNING *;
+  `,
+    values: [features, userId],
+  });
+
+  return result.rows[0];
+}
+
 const user = {
   create,
   update,
   findOneByUserName,
   findOneByEmail,
   findOneById,
+  setFeatures,
 };
 
 export default user;
