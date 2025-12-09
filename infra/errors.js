@@ -116,3 +116,14 @@ export class UnauthorizedError extends Error {
     };
   }
 }
+
+export class ForbiddenError extends Error {
+  constructor({ cause, message, action }) {
+    super(message || "User not authorized", {
+      cause,
+    });
+    this.name = "ForbiddenError";
+    this.action = action || "Check your permissions and try again.";
+    this.statusCode = 403;
+  }
+}
