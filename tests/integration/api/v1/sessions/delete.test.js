@@ -64,6 +64,8 @@ describe("DELETE /api/v1/sessions", () => {
         username: "UserWithValidSession2",
       });
 
+      await orchestrator.activateUser(user.id);
+
       const sessionObject = await orchestrator.createSession(user.id);
 
       const response = await fetch("http://localhost:3000/api/v1/sessions", {
@@ -86,11 +88,11 @@ describe("DELETE /api/v1/sessions", () => {
 
       expect(
         sessionObjectResponse.expires_at <
-          sessionObject.expires_at.toISOString(),
+        sessionObject.expires_at.toISOString(),
       ).toBe(true);
       expect(
         sessionObjectResponse.updated_at >
-          sessionObject.updated_at.toISOString(),
+        sessionObject.updated_at.toISOString(),
       ).toBe(true);
 
       // Set cookies assertions

@@ -8,6 +8,7 @@ import {
 } from "infra/errors";
 import * as cookie from "cookie";
 import session from "models/session";
+import user from "models/user";
 import authorization from "models/authorization";
 
 function onNoMatchHandler(request, response) {
@@ -30,6 +31,8 @@ function onErrorHandler(error, request, response) {
   });
 
   console.error(publicErrorObject);
+  if (error.cause) console.error("Caused by:", error.cause);
+  else console.error("Thrown error:", error);
 
   response.status(publicErrorObject.statusCode).json(publicErrorObject);
 }
@@ -69,12 +72,12 @@ async function injectAnonymousOrUser(request, response, next) {
 async function injectAuthenticatedUser(request) {
   const sessionToken = request.cookies.session_id;
   const sessionObject = await session.findOneValidByToken(sessionToken);
-  const user = await user.findOneById(sessionObject.user_id);
+  const authenticatedUser = await user.findOneById(sessionObject.user_id);
 
   request.context = {
     ...request.context,
-    user: user,
-  }
+    user: authenticatedUser,
+  };
 }
 
 function injectAnonymousUser(request) {
